@@ -1,4 +1,3 @@
-# test
 exports.handler = async function handler(context, event, callback) {
   try {
     const runtime = require('twilio').default.runtime;
@@ -8,13 +7,30 @@ exports.handler = async function handler(context, event, callback) {
     const specialDayFunctionURL = 'is-special-day';
 
     const openingHoursFunction = runtime.services(context.SERVICE_SID).functions.function(openingHoursFunctionURL);
-    const responseOpeningHours = await openingHoursFunction.invoke();
+    const specialDayFunction = runtime.services(context.SERVICE_SID).functions.function(specialDayFunctionURL);
+
+    // Use context.ACCOUNT_SID and context.AUTH_TOKEN directly in the authentication header
+    const auth = 'Basic ' + Buffer.from(context.ACCOUNT_SID + ':' + context.AUTH_TOKEN).toString('base64');
+
+    const headers = {
+      'Authorization': auth,
+      'Content-Type': 'application/json', // Adjust based on your function's expected content type
+    };
+
+    const options = {
+      method: 'POST',
+      headers: headers,
+    };
+
+    // Invoke openingHoursFunction
+    const responseOpeningHours = await openingHoursFunction.invoke(options);
     const isRegularWeekdaysOpeningHours = responseOpeningHours.data;
 
-    const specialDayFunction = runtime.services(context.SERVICE_SID).functions.function(specialDayFunctionURL);
-    const responseSpecialDay = await specialDayFunction.invoke();
+    // Invoke specialDayFunction
+    const responseSpecialDay = await specialDayFunction.invoke(options);
     const isSpecialDay = responseSpecialDay.data;
 
+    // Your logic based on function responses
     if (isRegularWeekdaysOpeningHours || isSpecialDay) {
       switch (event.Digits) {
         case '1':
