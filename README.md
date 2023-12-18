@@ -15,10 +15,12 @@ exports.handler = async function handler(context, event, callback) {
 
     // Invoke openingHoursFunction
     const responseOpeningHours = await runtime.request({ ...options, uri: openingHoursFunctionURL });
+    console.log('Response from openingHoursFunction:', responseOpeningHours); // Add this line for logging
     const isRegularWeekdaysOpeningHours = responseOpeningHours.data;
 
     // Invoke specialDayFunction
     const responseSpecialDay = await runtime.request({ ...options, uri: specialDayFunctionURL });
+    console.log('Response from specialDayFunction:', responseSpecialDay); // Add this line for logging
     const isSpecialDay = responseSpecialDay.data;
 
     // Your logic based on function responses
@@ -43,6 +45,6 @@ exports.handler = async function handler(context, event, callback) {
     callback(null, twiml);
   } catch (error) {
     console.error('Error:', error);
-    callback('Application error', null);
+    callback('Application error: ' + error.message, null);
   }
 };
