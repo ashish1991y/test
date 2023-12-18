@@ -1,36 +1,24 @@
-
-//read me
-
 exports.handler = async function handler(context, event, callback) {
   try {
     const runtime = require('twilio').default.runtime;
     let twiml = new Twilio.twiml.VoiceResponse();
 
-    const openingHoursFunctionURL = 'is-regular-weekday-opening-hours';
-    const specialDayFunctionURL = 'is-special-day';
-
-    const openingHoursFunction = runtime.services(context.SERVICE_SID).functions.function(openingHoursFunctionURL);
-    const specialDayFunction = runtime.services(context.SERVICE_SID).functions.function(specialDayFunctionURL);
-
-    // Use context.ACCOUNT_SID and context.AUTH_TOKEN directly in the authentication header
-    const auth = 'Basic ' + Buffer.from(context.ACCOUNT_SID + ':' + context.AUTH_TOKEN).toString('base64');
-
-    const headers = {
-      'Authorization': auth,
-      'Content-Type': 'application/json', // Adjust based on your function's expected content type
-    };
+    const openingHoursFunctionURL = 'https://data-3232.twil.io/is-regular-weekday-opening-hours';
+    const specialDayFunctionURL = 'https://data-3232.twil.io/is-special-day';
 
     const options = {
       method: 'POST',
-      headers: headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
 
     // Invoke openingHoursFunction
-    const responseOpeningHours = await openingHoursFunction.invoke(options);
+    const responseOpeningHours = await runtime.request({ ...options, uri: openingHoursFunctionURL });
     const isRegularWeekdaysOpeningHours = responseOpeningHours.data;
 
     // Invoke specialDayFunction
-    const responseSpecialDay = await specialDayFunction.invoke(options);
+    const responseSpecialDay = await runtime.request({ ...options, uri: specialDayFunctionURL });
     const isSpecialDay = responseSpecialDay.data;
 
     // Your logic based on function responses
